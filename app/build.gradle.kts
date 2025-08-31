@@ -33,19 +33,16 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    // Добавьте это, если у вас есть activity_main.xml
-    buildFeatures {
-        viewBinding = true
-    }
 }
 
 dependencies {
+    // Стандартные зависимости
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
-    // ViewModel и Activity KTX
+    // ViewModel и Activity KTX (для by viewModels)
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.activity:activity-ktx:1.9.0")
 
@@ -74,6 +71,7 @@ dependencies {
     implementation("androidx.camera:camera-view:$cameraxVersion")
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
 
+    // Зависимости для тестов
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
