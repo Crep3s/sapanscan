@@ -1,12 +1,13 @@
 package com.example.warehousechecker.ui
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.warehousechecker.databinding.ItemProductChecklistBinding
 import com.example.warehousechecker.network.Product
 
-// Вспомогательный класс для хранения состояния (отмечен/не отмечен)
+// Вспомогательный класс для хранения состояния
 data class ChecklistItem(
     val product: Product,
     var isChecked: Boolean = false
@@ -34,11 +35,16 @@ class ProductChecklistAdapter(
     fun getCheckedCount(): Int = items.count { it.isChecked }
 
     // Функция для отметки товара по штрих-коду
-    fun checkItemByBarcode(barcode: String) {
+    // Возвращает true, если товар был найден и отмечен, иначе false
+    fun checkItemByBarcode(barcode: String): Boolean {
+        // Ищем ПЕРВЫЙ НЕОТМЕЧЕННЫЙ товар с таким штрих-кодом
         val index = items.indexOfFirst { it.product.barCode == barcode && !it.isChecked }
-        if (index != -1) {
+        return if (index != -1) {
             items[index].isChecked = true
             notifyItemChanged(index)
+            true // Успех
+        } else {
+            false // Неудача (товар не найден или все уже отмечены)
         }
     }
 
@@ -48,8 +54,16 @@ class ProductChecklistAdapter(
         fun bind(item: ChecklistItem) {
             binding.productNameTextView.text = item.product.name
             binding.productSkuTextView.text = "Артикул: ${item.product.sku ?: "нет"}"
-            binding.productQuantityTextView.text = "x${item.product.quantity}"
+            // Количество теперь всегда "x1", так как список "плоский"
+            binding.productQuantityTextView.text = "x1"
             binding.productCheckBox.isChecked = item.isChecked
+
+            // Меняем цвет фона для отмеченных позиций для наглядности
+            if (item.isChecked) {
+                itemView.setBackgroundColor(Color.parseColor("#E0F7FA")) // Светло-голубой
+            } else {
+                itemView.setBackgroundColor(Color.TRANSPARENT)
+            }
         }
     }
 }

@@ -6,9 +6,37 @@
     android:layout_height="match_parent"
     tools:context=".ui.BarcodeScannerActivity">
 
+    <!-- Камера на заднем плане -->
     <androidx.camera.view.PreviewView
         android:id="@+id/cameraPreview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <!-- Рамка поверх камеры -->
+    <ImageView
+        android:id="@+id/scannerFrame"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/scanner_frame"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.8"
+        app:layout_constraintHeight_percent="0.3"
+        android:contentDescription="Рамка сканирования" />
+
+    <!-- Кнопка "Закрыть" (крестик) -->
+    <ImageButton
+        android:id="@+id/closeButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@android:color/white"
+        android:contentDescription="Закрыть сканер" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

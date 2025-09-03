@@ -31,6 +31,10 @@ class BarcodeScannerActivity : AppCompatActivity() {
         binding = ActivityScannerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.closeButton.setOnClickListener {
+            finish()
+        }
+
         cameraExecutor = Executors.newSingleThreadExecutor()
         cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
