@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.warehousechecker"
-    compileSdk = 35
+    compileSdk = 34
 
     // 2. Создаем объект для чтения local.properties
     val localProperties = Properties()
@@ -19,7 +19,7 @@ android {
     defaultConfig {
         applicationId = "com.example.warehousechecker"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -87,7 +87,6 @@ dependencies {
         exclude(group = "org.apache.httpcomponents")
     }
     implementation("com.google.auth:google-auth-library-oauth2-http:1.15.0")
-    implementation(libs.androidx.activity)
 
     // CameraX & ML Kit
     val cameraxVersion = "1.3.1"
