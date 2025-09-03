@@ -15,7 +15,7 @@ import com.example.warehousechecker.ui.MainViewModel // <- Вот он
 import com.example.warehousechecker.ui.OrderState    // <- И этот
 import com.google.gson.Gson // <- И этот
 import kotlinx.coroutines.launch
-
+import com.example.warehousechecker.ui.ChecklistActivity
 class MainActivity : AppCompatActivity() {
 
     // Теперь студия знает, что такое MainViewModel

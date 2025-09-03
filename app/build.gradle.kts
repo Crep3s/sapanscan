@@ -5,12 +5,20 @@ plugins {
 
 android {
     namespace = "com.example.warehousechecker"
-    compileSdk = 34
-
+    compileSdk = 35
+    packaging {
+        resources {
+            excludes.add("META-INF/DEPENDENCIES")
+            // Иногда могут возникать конфликты и с другими файлами,
+            // их можно добавлять сюда же. Например:
+            // excludes.add("META-INF/LICENSE")
+            // excludes.add("META-INF/NOTICE")
+        }
+    }
     defaultConfig {
         applicationId = "com.example.warehousechecker"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -36,7 +44,7 @@ android {
 }
 
 dependencies {
-    // Стандартные зависимости
+    // Стандартные зависимостиі
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
@@ -62,6 +70,7 @@ dependencies {
         exclude(group = "org.apache.httpcomponents")
     }
     implementation("com.google.auth:google-auth-library-oauth2-http:1.15.0")
+    implementation(libs.androidx.activity)
 
     // CameraX & ML Kit
     val cameraxVersion = "1.3.1"

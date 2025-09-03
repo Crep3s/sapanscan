@@ -1,3 +1,4 @@
+package com.example.warehousechecker.data
 import android.content.Context
 import com.example.warehousechecker.network.Product
 import com.example.warehousechecker.network.RetrofitClient

@@ -1,3 +1,4 @@
+package com.example.warehousechecker.network
 import com.google.gson.annotations.SerializedName
 
 // Модель для полного ответа от API

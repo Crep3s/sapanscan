@@ -1,3 +1,4 @@
+package com.example.warehousechecker.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
