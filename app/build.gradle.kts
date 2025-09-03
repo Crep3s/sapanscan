@@ -1,3 +1,4 @@
+import java.util.Properties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -7,15 +8,14 @@ plugins {
 android {
     namespace = "com.example.warehousechecker"
     compileSdk = 35
-    packaging {
-        resources {
-            excludes.add("META-INF/DEPENDENCIES")
-            // Иногда могут возникать конфликты и с другими файлами,
-            // их можно добавлять сюда же. Например:
-            // excludes.add("META-INF/LICENSE")
-            // excludes.add("META-INF/NOTICE")
-        }
+
+    // 2. Создаем объект для чтения local.properties
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(localPropertiesFile.inputStream())
     }
+
     defaultConfig {
         applicationId = "com.example.warehousechecker"
         minSdk = 24
@@ -24,6 +24,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // 3. Создаем поле в BuildConfig, читая свойство из local.properties
+        // Убедитесь, что имя "SALESDRIVE_API_KEY" совпадает с тем, что в local.properties
+        val salesDriveApiKey = localProperties.getProperty("SALESDRIVE_API_KEY")
+        buildConfigField("String", "SALESDRIVE_API_KEY", "\"$salesDriveApiKey\"")
     }
 
     buildTypes {
@@ -35,15 +40,23 @@ android {
             )
         }
     }
+
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    packaging {
+        resources {
+            excludes.add("META-INF/DEPENDENCIES")
+        }
     }
 }
 

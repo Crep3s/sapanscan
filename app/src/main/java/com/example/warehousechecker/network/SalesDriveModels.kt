@@ -1,20 +1,23 @@
 package com.example.warehousechecker.network
+
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
-// Модель для полного ответа от API
-data class SalesDriveResponse(
-    val data: DealData
+
+// 1. Самый верхний уровень ответа от сервера
+data class ApiResponse(
+    val status: String,
+    val data: OrderData // Вложенный объект "data"
 )
 
-// Модель, описывающая сам заказ (сделку)
-data class DealData(
-    val id: String,
-    @SerializedName("products") // Указываем, что в JSON поле называется "products"
-    val productList: List<Product>
+// 2. Объект "data", который содержит информацию о сделке
+data class OrderData(
+    // Здесь могут быть другие поля сделки, но нам нужен только список продуктов
+    @SerializedName("products") val productList: List<Product>
 )
 
-@Parcelize // <-- ДОБАВЬТЕ ЭТУ АННОТАЦИЮ
+// 3. Модель самого продукта (она остается почти без изменений)
+@Parcelize
 data class Product(
     val id: String,
     val name: String,

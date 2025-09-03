@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     // ЗАМЕНИТЕ "ВАШ_ДОМЕН" на ваш домен в SalesDrive
-    private const val BASE_URL = "https://biks.salesdrive.ua/api/v1/"
+    private const val BASE_URL = "https://salesdrive.com.ua/api/v1/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
