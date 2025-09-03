@@ -1,6 +1,7 @@
 package com.example.warehousechecker.network
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-
+import kotlinx.parcelize.Parcelize
 // Модель для полного ответа от API
 data class SalesDriveResponse(
     val data: DealData
@@ -13,9 +14,12 @@ data class DealData(
     val productList: List<Product>
 )
 
-// Модель для одного товара в заказе
+@Parcelize // <-- ДОБАВЬТЕ ЭТУ АННОТАЦИЮ
 data class Product(
+    val id: String,
     val name: String,
-    val sku: String?, // Артикул может отсутствовать
-    val quantity: Double
-)
+    val price: Double,
+    val quantity: Int,
+    @SerializedName("bar_code") val barCode: String?,
+    @SerializedName("articul") val sku: String?
+) : Parcelable

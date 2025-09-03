@@ -1,85 +1,132 @@
 package com.example.warehousechecker
 
-// ИМПОРТЫ, КОТОРЫХ НЕ ХВАТАЛО:
+import android.Manifest
+import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.warehousechecker.ui.MainViewModel // <- Вот он
-import com.example.warehousechecker.ui.OrderState    // <- И этот
-import com.google.gson.Gson // <- И этот
-import kotlinx.coroutines.launch
+import com.example.warehousechecker.databinding.ActivityMainBinding
+import com.example.warehousechecker.network.Product
+import com.example.warehousechecker.ui.BarcodeScannerActivity
 import com.example.warehousechecker.ui.ChecklistActivity
+import com.example.warehousechecker.ui.MainViewModel
+import com.example.warehousechecker.ui.OrderState
+import kotlinx.coroutines.launch
+
 class MainActivity : AppCompatActivity() {
 
-    // Теперь студия знает, что такое MainViewModel
+    private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
 
-    private lateinit var orderIdEditText: EditText
-    private lateinit var loadOrderButton: Button
-    private lateinit var progressBar: ProgressBar
+    // 1. Регистрируем обработчик для получения результата от сканера
+    private val barcodeScannerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val barcode = result.data?.getStringExtra("scanned_barcode")
+            if (!barcode.isNullOrEmpty()) {
+                binding.orderIdEditText.setText(barcode)
+                viewModel.loadOrder(barcode) // Сразу загружаем заказ
+            }
+        }
+    }
+
+    // 2. Регистрируем обработчик для запроса разрешений
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            openScanner() // Если разрешение дали, открываем сканер
+        } else {
+            Toast.makeText(this, "Для сканирования необходимо разрешение на использование камеры", Toast.LENGTH_LONG).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        orderIdEditText = findViewById(R.id.orderIdEditText)
-        loadOrderButton = findViewById(R.id.loadOrderButton)
-        progressBar = findViewById(R.id.progressBar)
+        setupListeners()
+        observeViewModel()
+    }
 
-        loadOrderButton.setOnClickListener {
-            val orderId = orderIdEditText.text.toString().trim()
-            if (orderId.isNotEmpty()) {
-                // Теперь студия знает, что такое loadOrder
-                viewModel.loadOrder(orderId)
-            } else {
-                Toast.makeText(this, "Введите номер заказа", Toast.LENGTH_SHORT).show()
-            }
+    private fun setupListeners() {
+        binding.loadOrderButton.setOnClickListener {
+            loadOrderFromInput()
         }
 
-        observeViewModel()
+        binding.scanButton.setOnClickListener {
+            checkCameraPermissionAndOpenScanner()
+        }
+    }
+
+    private fun loadOrderFromInput() {
+        val orderId = binding.orderIdEditText.text.toString().trim()
+        if (orderId.isNotEmpty()) {
+            viewModel.loadOrder(orderId)
+        } else {
+            Toast.makeText(this, "Пожалуйста, введите номер заказа", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun checkCameraPermissionAndOpenScanner() {
+        when {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
+                openScanner() // Разрешение уже есть
+            }
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA) // Запрашиваем разрешение
+            }
+        }
+    }
+
+    private fun openScanner() {
+        val intent = Intent(this, BarcodeScannerActivity::class.java)
+        barcodeScannerLauncher.launch(intent)
     }
 
     private fun observeViewModel() {
         lifecycleScope.launch {
-            // Теперь студия знает, что такое orderState
             viewModel.orderState.collect { state ->
                 when (state) {
-                    // И что такое OrderState
                     is OrderState.Idle -> {
-                        progressBar.visibility = View.GONE
-                        loadOrderButton.isEnabled = true
+                        binding.progressBar.visibility = View.GONE
+                        binding.errorTextView.visibility = View.GONE
+                        binding.loadOrderButton.isEnabled = true
                     }
                     is OrderState.Loading -> {
-                        progressBar.visibility = View.VISIBLE
-                        loadOrderButton.isEnabled = false
+                        binding.progressBar.visibility = View.VISIBLE
+                        binding.errorTextView.visibility = View.GONE
+                        binding.loadOrderButton.isEnabled = false
                     }
                     is OrderState.Success -> {
-                        progressBar.visibility = View.GONE
-                        loadOrderButton.isEnabled = true
-                        Toast.makeText(this@MainActivity, "Заказ загружен", Toast.LENGTH_SHORT).show()
-
-                        // Переход на следующий экран
-                        // !! Важно: ChecklistActivity еще не создан, поэтому эта строка будет красной
-                        // до тех пор, пока вы не создадите этот файл.
-                        val intent = Intent(this@MainActivity, ChecklistActivity::class.java)
-                        // Передаем список товаров в виде JSON строки
-                        intent.putExtra("PRODUCTS_JSON", Gson().toJson(state.products))
-                        startActivity(intent)
+                        binding.progressBar.visibility = View.GONE
+                        binding.loadOrderButton.isEnabled = true
+                        openChecklistActivity(state.products)
                     }
                     is OrderState.Error -> {
-                        progressBar.visibility = View.GONE
-                        loadOrderButton.isEnabled = true
-                        Toast.makeText(this@MainActivity, "Ошибка: ${state.message}", Toast.LENGTH_LONG).show()
+                        binding.progressBar.visibility = View.GONE
+                        binding.loadOrderButton.isEnabled = true
+                        binding.errorTextView.visibility = View.VISIBLE
+                        binding.errorTextView.text = state.message
                     }
                 }
             }
         }
+    }
+
+    private fun openChecklistActivity(products: List<Product>) {
+        val intent = Intent(this, ChecklistActivity::class.java).apply {
+            putParcelableArrayListExtra("products_list", ArrayList(products))
+        }
+        startActivity(intent)
     }
 }
